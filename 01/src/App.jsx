@@ -37,19 +37,43 @@ function App() {
   const [turn, setTurn] = useState(Turns.x)
   const [winner, setWinner] = useState(null) //null no ganador y false empate :p
 
-  const checWinner = () => {
-    for (const combo of Combos)
+  const checWinner = (checkBoard) => {
+    for (const combo of Combos) {
+      const [a, b, c] = combo
+      if (checkBoard[a] && checkBoard[a] === checkBoard[b] && checkBoard[a] === checkBoard[c]) 
+        {
+        return checkBoard[a]
+      }
+    }
+    return null
+  }
+
+  const resetGame = () => {
+    setBoard(Array(9).fill(null))
+    setTurn(Turns.x)
+    setWinner(null)
+  }
+  
+  const checkEndGame = (newBoard) => {
+    return newBoard.every(square => square !== null)
   }
 
   const updateBoard = (index) => {
-    if (board[index]) return
-
+    if (board[index] || winner) return
+    
     const newBoard = [ ... board]
     newBoard[index] = turn 
     setBoard(newBoard)
 
     const newTurn = turn === Turns.x ? Turns.o : Turns.x 
     setTurn(newTurn)
+
+    const newWinner = checWinner(newBoard)
+    if (newWinner) {
+      setWinner(newWinner)
+   } else if (checkEndGame(newBoard)) {
+      setWinner(false)
+    }
   }
 
   return (
@@ -58,6 +82,9 @@ function App() {
         <h1>
           Tres en Raya
         </h1>
+        <button
+        onClick={resetGame}
+        >Empezar de cero</button>
         <section className='game'>
           {
             board.map((_, index)=> {
@@ -77,6 +104,30 @@ function App() {
           <Square isSelected={turn === Turns.x}>{Turns.x}</Square>
           <Square isSelected={turn === Turns.o}>{Turns.o}</Square>
         </section>
+        
+        {
+          winner !== null && (
+            <section className="winner">
+              <div className="text">
+                <h2>
+                  {
+                    winner === false
+                    ? 'Empate'
+                    : 'El ganador es: ' + winner
+                  }
+                </h2>
+                <header className="win">
+                  {winner && <Square>{winner}</Square>}
+                </header>
+                <footer>
+                  <button
+                  onClick={resetGame}
+                  >Jugar de nuevo</button>
+                </footer>
+                </div>
+            </section>
+          )
+        }
       </main>
     </>
   )
